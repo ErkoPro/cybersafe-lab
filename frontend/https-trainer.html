@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HTTPS & Safe Browsing Trainer — CyberSafe Lab</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071427;
+      --bg-dark: #061026;
+      --card: #0b1221;
+      --accent: #06b6d4;
+      --accent2: #7c3aed;
+      --muted: #9aa4b2;
+      --text: #e6eef8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --border: rgba(255, 255, 255, 0.03);
+      --shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: #071427;
+      color: var(--text);
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #071427, #0a1b35, #061026, #0d1f3a);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      z-index: -3;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+      z-index: -2;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    .animated-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(6, 182, 212, 0.3);
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; animation-duration: 15s; }
+    .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: 2s; animation-duration: 18s; }
+    .particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: 4s; animation-duration: 20s; }
+    .particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: 1s; animation-duration: 16s; }
+    .particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: 3s; animation-duration: 19s; }
+    .particle:nth-child(6) { width: 6px; height: 6px; left: 60%; animation-delay: 5s; animation-duration: 17s; }
+    .particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: 2.5s; animation-duration: 21s; }
+    .particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: 4.5s; animation-duration: 18s; }
+    .particle:nth-child(9) { width: 4px; height: 4px; left: 90%; animation-delay: 1.5s; animation-duration: 16s; }
+    .particle:nth-child(10) { width: 6px; height: 6px; left: 15%; animation-delay: 3.5s; animation-duration: 22s; }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100px) translateX(100px) scale(1); opacity: 0; }
+    }
+
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+      animation: gridMove 20s linear infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 30px;
+      transition: all 0.2s;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .warning-banner {
+      display: inline-block;
+      padding: 12px 24px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 12px;
+      color: var(--warning);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+
+    /* Info Section */
+    .info-section {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.05));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .info-section h2 {
+      font-size: 1.75rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .info-section p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    /* Input Section */
+    .input-section {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .input-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .url-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    }
+
+    .btn-check {
+      padding: 14px 32px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-check:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(2, 6, 23, 0.8);
+    }
+
+    /* Result Section */
+    .result-section {
+      display: none;
+      margin-top: 40px;
+    }
+
+    .result-section.visible {
+      display: block;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .analysis-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .analysis-card.safe {
+      border-left: 4px solid var(--success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .analysis-card.warning {
+      border-left: 4px solid var(--warning);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .analysis-card.danger {
+      border-left: 4px solid var(--error);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .analysis-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .url-display {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      word-break: break-all;
+    }
+
+    .features-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .features-list li {
+      padding: 12px 0;
+      padding-left: 32px;
+      position: relative;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .features-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .features-list li.warning::before {
+      content: '⚠';
+      color: var(--warning);
+    }
+
+    .features-list li.danger::before {
+      content: '✗';
+      color: var(--error);
+    }
+
+    .explanation-box {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    .explanation-box h4 {
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .explanation-box p {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+  <div class="grid-overlay"></div>
+  <div class="container">
+    <a href="main page/index.html" class="back-link">← Назад на главную</a>
+
+    <header class="header">
+      <h1>🔒 HTTPS & Safe Browsing Trainer</h1>
+      <div class="warning-banner">
+        ⚠️ ТОЛЬКО ДЛЯ ОБРАЗОВАТЕЛЬНЫХ ЦЕЛЕЙ
+      </div>
+    </header>
+
+    <!-- Info Section -->
+    <section class="info-section">
+      <h2>Что такое HTTPS?</h2>
+      <p>
+        <strong>HTTPS</strong> (HyperText Transfer Protocol Secure) — это защищенная версия протокола HTTP. 
+        Он использует шифрование для защиты данных между вашим браузером и веб-сайтом.
+      </p>
+      <p>
+        Когда вы видите <strong>🔒 замок</strong> в адресной строке и <strong>https://</strong> в URL, 
+        это означает, что соединение зашифровано и ваши данные защищены от перехвата.
+      </p>
+    </section>
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <h2>Проверка URL (учебный режим)</h2>
+      <p style="color: var(--muted); margin-bottom: 24px;">
+        Введите URL для анализа уровня безопасности
+      </p>
+      <input 
+        type="text" 
+        id="urlInput" 
+        class="url-input" 
+        placeholder="https://example.com или http://example.com"
+        autocomplete="off"
+      >
+      <br>
+      <button class="btn-check" onclick="analyzeURL()">Проанализировать</button>
+    </section>
+
+    <!-- Result Section -->
+    <section class="result-section" id="resultSection">
+      <!-- Results will be shown here -->
+    </section>
+  </div>
+
+  <script>
+    function analyzeURL() {
+      const url = document.getElementById('urlInput').value.trim();
+      
+      if (!url) {
+        alert('Пожалуйста, введите URL');
+        return;
+      }
+
+      const resultSection = document.getElementById('resultSection');
+      let protocol = '';
+      let domain = '';
+      let riskLevel = '';
+      let cardClass = '';
+      let icon = '';
+      let title = '';
+      let features = [];
+
+      // Parse URL
+      try {
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        const urlObj = new URL(url);
+        protocol = urlObj.protocol;
+        domain = urlObj.hostname;
+      } catch (e) {
+        protocol = 'unknown';
+        domain = url;
+      }
+
+      // Analyze
+      if (protocol === 'https:') {
+        riskLevel = 'safe';
+        cardClass = 'safe';
+        icon = '✅';
+        title = 'Безопасное соединение (HTTPS)';
+        features = [
+          { text: 'Соединение зашифровано', type: 'safe' },
+          { text: 'Данные защищены от перехвата', type: 'safe' },
+          { text: 'Сертификат безопасности активен', type: 'safe' }
+        ];
+
+        // Check for suspicious domains
+        if (domain.includes('free') || domain.includes('login') || domain.includes('secure') && domain.includes('-')) {
+          features.push({ text: '⚠ Подозрительный домен — может быть фишинг', type: 'warning' });
+        }
+      } else if (protocol === 'http:') {
+        riskLevel = 'warning';
+        cardClass = 'warning';
+        icon = '⚠️';
+        title = 'Небезопасное соединение (HTTP)';
+        features = [
+          { text: 'Соединение НЕ зашифровано', type: 'danger' },
+          { text: 'Данные могут быть перехвачены', type: 'danger' },
+          { text: 'Пароли и личная информация под угрозой', type: 'danger' },
+          { text: 'Не вводите конфиденциальные данные', type: 'warning' }
+        ];
+      } else {
+        riskLevel = 'danger';
+        cardClass = 'danger';
+        icon = '❌';
+        title = 'Неизвестный протокол';
+        features = [
+          { text: 'Невозможно определить тип соединения', type: 'danger' },
+          { text: 'Не переходите по подозрительным ссылкам', type: 'warning' }
+        ];
+      }
+
+      resultSection.innerHTML = `
+        <div class="analysis-card ${cardClass}">
+          <h3>${icon} ${title}</h3>
+          <div class="url-display">${protocol}//${domain}</div>
+          
+          <ul class="features-list">
+            ${features.map(f => `<li class="${f.type}">${f.text}</li>`).join('')}
+          </ul>
+
+          <div class="explanation-box">
+            <h4>💡 Объяснение простым языком:</h4>
+            <p>
+              ${riskLevel === 'safe' 
+                ? 'HTTPS = шифрование соединения. Ваши данные защищены при передаче. Однако это НЕ гарантирует, что сайт честный — важно также проверять домен и орфографию URL.'
+                : riskLevel === 'warning'
+                ? 'HTTP = отсутствие шифрования. Любой, кто перехватит ваше соединение, сможет увидеть ваши данные. НИКОГДА не вводите пароли, номера карт или другую конфиденциальную информацию на сайтах с HTTP.'
+                : 'Будьте осторожны с неизвестными протоколами. Всегда проверяйте URL перед переходом.'}
+            </p>
+            <p style="margin-top: 12px;">
+              <strong>Важно помнить:</strong> HTTPS защищает соединение, но не гарантирует безопасность сайта. 
+              Всегда проверяйте домен, орфографию URL и не переходите по подозрительным ссылкам.
+            </p>
+          </div>
+        </div>
+      `;
+
+      resultSection.classList.add('visible');
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Allow Enter key
+    document.getElementById('urlInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        analyzeURL();
+      }
+    });
+  </script>
+</body>
+</html>
+

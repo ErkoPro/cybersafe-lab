@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>2FA & Account Security Trainer — CyberSafe Lab</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071427;
+      --bg-dark: #061026;
+      --card: #0b1221;
+      --accent: #06b6d4;
+      --accent2: #7c3aed;
+      --muted: #9aa4b2;
+      --text: #e6eef8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --border: rgba(255, 255, 255, 0.03);
+      --shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: #071427;
+      color: var(--text);
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #071427, #0a1b35, #061026, #0d1f3a);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      z-index: -3;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+      animation: pulse 8s ease-in-out infinite;
+      z-index: -2;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    .animated-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(6, 182, 212, 0.3);
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; animation-duration: 15s; }
+    .particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: 2s; animation-duration: 18s; }
+    .particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: 4s; animation-duration: 20s; }
+    .particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: 1s; animation-duration: 16s; }
+    .particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: 3s; animation-duration: 19s; }
+    .particle:nth-child(6) { width: 6px; height: 6px; left: 60%; animation-delay: 5s; animation-duration: 17s; }
+    .particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: 2.5s; animation-duration: 21s; }
+    .particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: 4.5s; animation-duration: 18s; }
+    .particle:nth-child(9) { width: 4px; height: 4px; left: 90%; animation-delay: 1.5s; animation-duration: 16s; }
+    .particle:nth-child(10) { width: 6px; height: 6px; left: 15%; animation-delay: 3.5s; animation-duration: 22s; }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100px) translateX(100px) scale(1); opacity: 0; }
+    }
+
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+      animation: gridMove 20s linear infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 30px;
+      transition: all 0.2s;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header .subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .warning-banner {
+      display: inline-block;
+      padding: 12px 24px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 12px;
+      color: var(--warning);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    /* Info Section */
+    .info-section {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.05));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .info-section h2 {
+      font-size: 1.75rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .info-section p {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    /* Method Selection */
+    .methods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .method-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out both;
+    }
+
+    .method-card:nth-child(1) { animation-delay: 0.1s; }
+    .method-card:nth-child(2) { animation-delay: 0.2s; }
+    .method-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .method-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .method-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+    }
+
+    .method-card:hover::before {
+      opacity: 1;
+    }
+
+    .method-card.selected {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.05));
+    }
+
+    .method-card.selected::before {
+      opacity: 1;
+    }
+
+    .method-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .method-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .method-description {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Result Section */
+    .result-section {
+      display: none;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.05));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-top: 40px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    .result-section h2 {
+      font-size: 1.75rem;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .pros, .cons {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .pros {
+      border-left: 4px solid var(--success);
+    }
+
+    .cons {
+      border-left: 4px solid var(--error);
+    }
+
+    .pros h3, .cons h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pros ul, .cons ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .pros li, .cons li {
+      padding: 8px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .pros li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .cons li::before {
+      content: '✗';
+      position: absolute;
+      left: 0;
+      color: var(--error);
+      font-weight: 700;
+    }
+
+    .recommendation {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .recommendation h3 {
+      color: var(--success);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recommendation p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .security-level {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+    }
+
+    .security-bar {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .security-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .security-label {
+      font-weight: 600;
+      color: var(--text);
+      min-width: 120px;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 20px 12px;
+      }
+
+      .back-link {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+      }
+
+      .header {
+        margin-bottom: 28px;
+      }
+
+      .header h1 {
+        font-size: 1.75rem;
+        line-height: 1.2;
+      }
+
+      .header .subtitle {
+        font-size: 0.95rem;
+      }
+
+      .info-card {
+        padding: 20px 16px;
+        margin-bottom: 20px;
+      }
+
+      .info-card h2 {
+        font-size: 1.3rem;
+      }
+
+      .methods-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .method-card {
+        padding: 20px 18px;
+      }
+
+      .method-card h3 {
+        font-size: 1.2rem;
+      }
+
+      .method-card p {
+        font-size: 0.9rem;
+      }
+
+      .comparison-table {
+        font-size: 0.85rem;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 10px 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+      }
+
+      .container {
+        padding: 16px 8px;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .info-card {
+        padding: 18px 14px;
+      }
+
+      .method-card {
+        padding: 18px 16px;
+      }
+
+      .comparison-table {
+        font-size: 0.8rem;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        padding: 8px 6px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .header h1 {
+        font-size: 1.35rem;
+      }
+
+      .method-card {
+        padding: 16px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+  <div class="grid-overlay"></div>
+  <div class="container">
+    <a href="main page/index.html" class="back-link">← Назад на главную</a>
+
+    <header class="header">
+      <h1>🔐 2FA & Account Security Trainer</h1>
+      <div class="subtitle">Изучите методы двухфакторной аутентификации</div>
+      <div class="warning-banner">
+        ⚠️ ТОЛЬКО ДЛЯ ОБРАЗОВАТЕЛЬНЫХ ЦЕЛЕЙ
+      </div>
+    </header>
+
+    <!-- Info Section -->
+    <section class="info-section">
+      <h2>Что такое двухфакторная аутентификация (2FA)?</h2>
+      <p>
+        <strong>Двухфакторная аутентификация</strong> — это метод защиты аккаунта, который требует 
+        два независимых способа подтверждения вашей личности. Обычно это:
+      </p>
+      <p>
+        <strong>1. Что-то, что вы знаете</strong> (пароль) + <strong>2. Что-то, что у вас есть</strong> 
+        (телефон, приложение, ключ).
+      </p>
+      <p>
+        Это значительно повышает безопасность, так как даже если злоумышленник узнает ваш пароль, 
+        ему понадобится доступ к вашему второму фактору.
+      </p>
+    </section>
+
+    <!-- Method Selection -->
+    <section>
+      <h2 style="font-size: 1.5rem; margin-bottom: 24px; color: var(--text); text-align: center;">
+        Выберите метод 2FA для изучения:
+      </h2>
+      <div class="methods-grid">
+        <div class="method-card" onclick="selectMethod('sms')">
+          <div class="method-icon">📱</div>
+          <h3 class="method-title">SMS-код</h3>
+          <p class="method-description">
+            Код подтверждения приходит на ваш телефон через SMS-сообщение.
+          </p>
+        </div>
+
+        <div class="method-card" onclick="selectMethod('app')">
+          <div class="method-icon">📲</div>
+          <h3 class="method-title">Authenticator App</h3>
+          <p class="method-description">
+            Приложение-аутентификатор генерирует временные коды на вашем устройстве.
+          </p>
+        </div>
+
+        <div class="method-card" onclick="selectMethod('hardware')">
+          <div class="method-icon">🔑</div>
+          <h3 class="method-title">Hardware Key</h3>
+          <p class="method-description">
+            Физический ключ безопасности (U2F / YubiKey) для максимальной защиты.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result Section -->
+    <section class="result-section" id="resultSection">
+      <h2 id="resultTitle"></h2>
+      <div id="resultContent"></div>
+    </section>
+  </div>
+
+  <script>
+    const methods = {
+      sms: {
+        title: '📱 SMS-код',
+        pros: [
+          'Удобно — не нужно устанавливать приложения',
+          'Работает на любом телефоне',
+          'Простота использования'
+        ],
+        cons: [
+          'Уязвимо для SIM-swap атак',
+          'Легко перехватывается оператором',
+          'Зависит от качества связи',
+          'Может быть перехвачено через SS7'
+        ],
+        recommendation: 'SMS-2FA лучше, чем отсутствие 2FA, но не самый безопасный метод. Используйте для не критичных аккаунтов.',
+        securityLevel: 40
+      },
+      app: {
+        title: '📲 Authenticator App',
+        pros: [
+          'Работает офлайн — не нужен интернет',
+          'Не перехватывается оператором',
+          'Более безопасно, чем SMS',
+          'Бесплатно и доступно',
+          'Рекомендуется экспертами'
+        ],
+        cons: [
+          'Требует установки приложения',
+          'Нужно синхронизировать время',
+          'При потере устройства нужен резервный код'
+        ],
+        recommendation: 'Authenticator App — рекомендуемый метод для большинства пользователей. Баланс между безопасностью и удобством.',
+        securityLevel: 85
+      },
+      hardware: {
+        title: '🔑 Hardware Key (U2F / YubiKey)',
+        pros: [
+          'Максимальная защита',
+          'Устойчивость к фишингу',
+          'Используется в компаниях и госорганизациях',
+          'Не зависит от телефона',
+          'Защита от кейлоггеров'
+        ],
+        cons: [
+          'Требует покупки устройства',
+          'Можно потерять',
+          'Нужно иметь при себе',
+          'Не все сервисы поддерживают'
+        ],
+        recommendation: 'Hardware Key — лучший выбор для критичных аккаунтов (банк, работа, важные данные). Максимальный уровень защиты.',
+        securityLevel: 95
+      }
+    };
+
+    function selectMethod(method) {
+      // Remove previous selection
+      document.querySelectorAll('.method-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      // Add selection to clicked card
+      event.currentTarget.classList.add('selected');
+
+      // Show result
+      const data = methods[method];
+      const resultSection = document.getElementById('resultSection');
+      const resultTitle = document.getElementById('resultTitle');
+      const resultContent = document.getElementById('resultContent');
+
+      resultTitle.textContent = data.title;
+      
+      resultContent.innerHTML = `
+        <div class="pros-cons">
+          <div class="pros">
+            <h3>✅ Преимущества</h3>
+            <ul>
+              ${data.pros.map(pro => `<li>${pro}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="cons">
+            <h3>❌ Недостатки</h3>
+            <ul>
+              ${data.cons.map(con => `<li>${con}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <div class="recommendation">
+          <h3>💡 Рекомендация</h3>
+          <p>${data.recommendation}</p>
+        </div>
+
+        <div class="security-level">
+          <span class="security-label">Уровень безопасности:</span>
+          <div class="security-bar">
+            <div class="security-fill" style="width: ${data.securityLevel}%"></div>
+          </div>
+          <span style="color: var(--muted); font-weight: 600;">${data.securityLevel}%</span>
+        </div>
+      `;
+
+      resultSection.classList.add('visible');
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+</body>
+</html>
+
