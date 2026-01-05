@@ -1,0 +1,64 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/password-lab",
+      "destination": "/password checker/password-lab.html"
+    },
+    {
+      "source": "/phishing",
+      "destination": "/phishing/phishing.html"
+    },
+    {
+      "source": "/2fa",
+      "destination": "/2fa-trainer.html"
+    },
+    {
+      "source": "/data-breach",
+      "destination": "/data-breach-simulator.html"
+    },
+    {
+      "source": "/social-engineering",
+      "destination": "/social-engineering-trainer.html"
+    },
+    {
+      "source": "/https",
+      "destination": "/https-trainer.html"
+    },
+    {
+      "source": "/wifi",
+      "destination": "/wifi-safety-trainer.html"
+    },
+    {
+      "source": "/malware",
+      "destination": "/malware-awareness.html"
+    },
+    {
+      "source": "/research",
+      "destination": "/research-hub.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
+
